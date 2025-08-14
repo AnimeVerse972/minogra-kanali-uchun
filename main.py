@@ -668,6 +668,7 @@ async def add_kino_handler(message: types.Message, state: FSMContext):
     rows = message.text.strip().split("\n")
     successful = 0
     failed = 0
+
     for row in rows:
         parts = row.strip().split()
         if len(parts) < 5:
@@ -684,26 +685,21 @@ async def add_kino_handler(message: types.Message, state: FSMContext):
         reklama_id = int(reklama_id)
         post_count = int(post_count)
 
-        await add_kino_code(code, server_channel, reklama_id + 1, post_count, title)
-
-        download_btn = InlineKeyboardMarkup().add(
-            InlineKeyboardButton("📥 Yuklab olish", url=f"https://t.me/{BOT_USERNAME}?start={code}")
-        )
-
         try:
-            for ch in MAIN_CHANNELS:
-                await bot.copy_message(
-                    chat_id=ch,
-                    from_chat_id=server_channel,
-                        message_id=reklama_id,
-                reply_markup=download_btn
-        ) 
+            await add_kino_code(
+                code=code,
+                channel=server_channel,
+                message_id=reklama_id,
+                post_count=post_count,
+                title=title
+            )
             successful += 1
-        except:
+        except Exception as e:
+            print(f"❌ Xato: {e}")
             failed += 1
 
-    await message.answer(f"✅ Yangi kodlar qo‘shildi:\n\n✅ Muvaffaqiyatli: {successful}\n❌ Xatolik: {failed}")
     await state.finish()
+    await message.answer(f"✅ Muvaffaqiyatli qo‘shildi: {successful} ta\n❌ Xatolik: {failed} ta")
 
 @dp.message_handler(lambda m: m.text == "📄 Kodlar ro‘yxati")
 async def kodlar(message: types.Message):
